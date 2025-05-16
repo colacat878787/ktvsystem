@@ -3,96 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KTV 系統</title>
+    <title>更棒的 YouTube</title>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        /* 在此處新增您的 CSS 樣式 */
+        /* 在此處新增您的 CSS 樣式 (您可以稍後完善) */
         body {
             font-family: sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
+            background-color: #181818;
+            color: #f1f1f1;
+            margin: 0;
+            padding: 0;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 1200px;
+            margin: 20px auto;
             padding: 20px;
-            text-align: center;
         }
-        #search-container {
+        #search-bar {
+            display: flex;
             margin-bottom: 20px;
         }
-        #results-container {
+        #search-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: #f1f1f1;
+        }
+        #search-button {
+            padding: 10px 15px;
+            background-color: #e50914;
+            color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+        }
+        #player-area {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            aspect-ratio: 16 / 9;
+            background-color: #000; /* 預留播放器位置 */
+        }
+        #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 20px;
-            text-align: left;
+        }
+        #play-pause-button, #volume-control {
+            margin: 0 10px;
+            padding: 8px 12px;
+            background-color: #333;
+            color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+        }
+        #progress-bar-container {
+            background-color: #333;
+            height: 10px;
+            cursor: pointer;
+            margin: 0 20px;
+            flex-grow: 1;
+        }
+        #progress-bar {
+            background-color: #e50914;
+            height: 100%;
+            width: 0%;
         }
         #results-list {
             list-style: none;
             padding: 0;
-            margin: 0;
         }
         #results-list li {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #333;
             cursor: pointer;
         }
         #results-list li:last-child {
             border-bottom: none;
         }
-        #player-container {
-            text-align: center;
-        }
-        #player {
-            width: 100%;
-            max-width: 640px;
-            height: auto; /* 維持寬高比 */
-            aspect-ratio: 16 / 9;
-            margin: 0 auto;
-        }
-        #progress-bar-container {
-            background-color: #ddd;
-            height: 10px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        #progress-bar {
-            background-color: #4CAF50;
-            height: 100%;
-            width: 0%;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="search-container">
-            <input type="text" id="search-box" placeholder="搜尋歌曲...">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="搜尋 YouTube 影片...">
             <button id="search-button">搜尋</button>
+        </div>
+        <div id="player-area">
+            <div id="player"></div>
+        </div>
+        <div id="controls">
+            <button id="play-pause-button">播放</button>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <input type="range" id="volume-control" min="0" max="100" value="100">
         </div>
         <div id="results-container">
             <h2>搜尋結果</h2>
             <ul id="results-list"></ul>
         </div>
-        <div id="player-container">
-            <h2>播放器</h2>
-            <div id="player"></div>
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
-            </div>
-        </div>
     </div>
+
     <script>
-        // JavaScript 程式碼
         let player;
-        let songList = [];
         let currentVideoId = null;
         let isPlaying = false;
 
-        // 載入 YouTube IFrame Player API
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '390',
+                height: '360',
                 width: '640',
-                videoId: '',
+                videoId: '', // 初始時不載入影片
+                playerVars: {
+                    'playsinline': 1 // 在行動裝置上內嵌播放
+                },
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
@@ -100,80 +134,56 @@
             });
         }
 
-        // 播放器準備就緒時呼叫
         function onPlayerReady(event) {
-            // event.target.playVideo(); // 預設不自動播放
+            document.getElementById('play-pause-button').textContent = '播放';
         }
 
-        // 播放器狀態改變時呼叫
-         function onPlayerStateChange(event) {
+        function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 isPlaying = true;
+                document.getElementById('play-pause-button').textContent = '暫停';
                 updateProgressBar();
             } else if (event.data === YT.PlayerState.PAUSED) {
                 isPlaying = false;
+                document.getElementById('play-pause-button').textContent = '播放';
             } else if (event.data === YT.PlayerState.ENDED) {
                 isPlaying = false;
-                // 歌曲播放完畢，您可以自動播放下一首歌曲
-                // playNextSong();
+                document.getElementById('play-pause-button').textContent = '播放';
+                // 影片結束後的處理
             }
         }
 
-        // 播放歌曲
-        function playSong(videoId) {
+        function loadAndPlayVideo(videoId) {
             currentVideoId = videoId;
             player.loadVideoById(videoId);
         }
 
-        // 搜尋歌曲 (需要後端程式碼)
-        async function searchSongs(query) {
-            // 將搜尋 запросы 傳送到您的後端伺服器，該伺服器將使用 ytmusicapi 搜尋歌曲
-            //  fetch(`/search?query=${query}`)  <==  這行在 GitHub Pages 可能無法直接運作
-            //  您需要一個後端伺服器來處理搜尋 запросы，或者使用 serverless 函數 (例如，Cloud Functions)
-            //  為了簡化範例，我們在這裡使用一個模擬的 Promise 來示範
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const mockResults = [
-                        { videoId: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up', artist: 'Rick Astley' },
-                        { videoId: 'fJ9rUzIMcZQ', title: 'Bohemian Rhapsody', artist: 'Queen' },
-                        { videoId: 'k1i39Icr16E', title: 'Imagine', artist: 'John Lennon' },
-                    ];
-                    const filteredResults = mockResults.filter(song => song.title.toLowerCase().includes(query.toLowerCase()));
-                    resolve(filteredResults);
-                }, 500); // 模擬 500ms 的延遲
-            });
-        }
-
-        // 顯示搜尋結果
-        function displaySearchResults(results) {
-            const resultsList = document.getElementById('results-list');
-            resultsList.innerHTML = ''; // 清除先前的結果
-
-            results.forEach(song => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${song.title} - ${song.artist}`;
-                listItem.dataset.videoId = song.videoId;
-                listItem.addEventListener('click', () => {
-                    playSong(song.videoId);
-                });
-                resultsList.appendChild(listItem);
-            });
-        }
-
-        // 更新進度條
-        function updateProgressBar() {
-            if (isPlaying && currentVideoId) {
-                const duration = player.getDuration();
-                const currentTime = player.getCurrentTime();
-                const progress = (currentTime / duration) * 100;
-                document.getElementById('progress-bar').style.width = `${progress}%`;
-                setTimeout(updateProgressBar, 100); // 每 100 毫秒更新一次
+        function playPauseVideo() {
+            if (isPlaying) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
             }
         }
 
-        // 進度條點擊事件
+        function setVolume(volume) {
+            player.setVolume(volume);
+        }
+
+        function updateProgressBar() {
+            if (isPlaying && player && player.getDuration) {
+                const duration = player.getDuration();
+                const currentTime = player.getCurrentTime();
+                const progress = duration ? (currentTime / duration) * 100 : 0;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            }
+            if (isPlaying) {
+                requestAnimationFrame(updateProgressBar);
+            }
+        }
+
         document.getElementById('progress-bar-container').addEventListener('click', (e) => {
-            if (currentVideoId) {
+            if (player && player.getDuration) {
                 const totalWidth = e.target.offsetWidth;
                 const clickPosition = e.offsetX;
                 const newTime = (clickPosition / totalWidth) * player.getDuration();
@@ -181,10 +191,46 @@
             }
         });
 
-        // 搜尋按鈕點擊事件處理程序
+        document.getElementById('play-pause-button').addEventListener('click', playPauseVideo);
+
+        document.getElementById('volume-control').addEventListener('input', (e) => {
+            setVolume(e.target.value);
+        });
+
+        async function searchYouTube(query) {
+            // --- 這裡將整合您的 Supadata.ai API ---
+            // 這個範例仍然使用模擬資料
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockResults = [
+                        { id: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)' },
+                        { id: 'fJ9rUzIMcZQ', title: 'Queen - Bohemian Rhapsody (Official Video)' },
+                        { id: 'YOcmSsBfafg', title: 'Adele - Hello (Official Music Video)' }
+                    ];
+                    const filteredResults = mockResults.filter(item =>
+                        item.title.toLowerCase().includes(query.toLowerCase())
+                    );
+                    resolve(filteredResults.slice(0, 10)); // 返回前 10 個結果
+                }, 500);
+            });
+        }
+
+        function displaySearchResults(results) {
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = '';
+            results.forEach(result => {
+                const listItem = document.createElement('li');
+                listItem.textContent = result.title;
+                listItem.addEventListener('click', () => {
+                    loadAndPlayVideo(result.id);
+                });
+                resultsList.appendChild(listItem);
+            });
+        }
+
         document.getElementById('search-button').addEventListener('click', async () => {
-            const query = document.getElementById('search-box').value;
-            const results = await searchSongs(query);
+            const query = document.getElementById('search-input').value;
+            const results = await searchYouTube(query);
             displaySearchResults(results);
         });
     </script>
