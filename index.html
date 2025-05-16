@@ -4,223 +4,189 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KTV 系統</title>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
+        /* 在此處新增您的 CSS 樣式 */
         body {
             font-family: sans-serif;
-            margin: 0;
-            background-color: #222;
-            color: #eee;
-            overflow: hidden; /* 隱藏滾動條直到內容載入 */
+            background-color: #f0f0f0;
+            color: #333;
         }
-
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #333;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
         }
-
-        #loading-text {
-            font-size: 2em;
+        #search-container {
             margin-bottom: 20px;
         }
-
-        .loading-animation {
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            animation: spin 1s linear infinite;
+        #results-container {
+            margin-bottom: 20px;
+            text-align: left;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        #results-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
-
-        #main-content {
-            display: none; /* 預設隱藏主內容 */
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 300px 1fr; /* 左側選歌，右側播放 */
-            gap: 20px;
-        }
-
-        #song-list {
-            border-right: 1px solid #555;
-            padding-right: 20px;
-            height: 80vh;
-            overflow-y: auto;
-        }
-
-        .song-item {
-            padding: 10px 0;
+        #results-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
             cursor: pointer;
-            border-bottom: 1px solid #444;
         }
-
-        .song-item:last-child {
+        #results-list li:last-child {
             border-bottom: none;
         }
-
-        #player-area {
-            display: grid;
-            grid-template-rows: auto 1fr auto; /* 專輯/資訊, 歌詞, 控制條 */
-            height: 80vh;
-            padding: 20px;
-            background-color: #444;
-            border-radius: 5px;
-        }
-
-        #song-info {
+        #player-container {
             text-align: center;
-            margin-bottom: 20px;
         }
-
-        #album-cover {
-            width: 150px;
-            height: 150px;
-            border-radius: 5px;
-            margin: 0 auto 10px;
-            background-color: #777; /* 預留專輯圖片位置 */
+        #player {
+            width: 100%;
+            max-width: 640px;
+            height: auto; /* 維持寬高比 */
+            aspect-ratio: 16 / 9;
+            margin: 0 auto;
         }
-
-        #song-title {
-            font-size: 1.5em;
-            margin-bottom: 5px;
-        }
-
-        #artist-name {
-            color: #ccc;
-        }
-
-        #lyrics-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.2em;
-            white-space: pre-wrap; /* 保留換行 */
-        }
-
         #progress-bar-container {
-            background-color: #555;
+            background-color: #ddd;
             height: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         #progress-bar {
-            background-color: #eee;
+            background-color: #4CAF50;
             height: 100%;
             width: 0%;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-
-    <div id="loading-screen">
-        <div id="loading-text">KTV 系統正在啟動...</div>
-        <div class="loading-animation"></div>
-    </div>
-
-    <div id="main-content">
-        <div id="song-list">
-            <h2>歌曲列表</h2>
-            <div class="song-item" data-song-id="1" data-title="歌曲一" data-artist="歌手 A" data-album-cover="placeholder.jpg" data-lyrics="歌詞\n第一段">歌曲一 - 歌手 A</div>
-            <div class="song-item" data-song-id="2" data-title="歌曲二" data-artist="歌手 B" data-album-cover="placeholder.jpg" data-lyrics="歌詞\n第二段">歌曲二 - 歌手 B</div>
-            </div>
-        <div id="player-area">
-            <div id="song-info">
-                <div id="album-cover"></div>
-                <div id="song-title">請選擇歌曲</div>
-                <div id="artist-name"></div>
-            </div>
-            <div id="lyrics-container"></div>
+    <div class="container">
+        <div id="search-container">
+            <input type="text" id="search-box" placeholder="搜尋歌曲...">
+            <button id="search-button">搜尋</button>
+        </div>
+        <div id="results-container">
+            <h2>搜尋結果</h2>
+            <ul id="results-list"></ul>
+        </div>
+        <div id="player-container">
+            <h2>播放器</h2>
+            <div id="player"></div>
             <div id="progress-bar-container">
                 <div id="progress-bar"></div>
             </div>
         </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 模擬同步音樂的過程 (實際需要串接 API)
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('main-content').style.display = 'grid';
-            }, 3000); // 3 秒後顯示主內容
+        // JavaScript 程式碼
+        let player;
+        let songList = [];
+        let currentVideoId = null;
+        let isPlaying = false;
 
-            const songItems = document.querySelectorAll('.song-item');
-            const albumCover = document.getElementById('album-cover');
-            const songTitleDisplay = document.getElementById('song-title');
-            const artistNameDisplay = document.getElementById('artist-name');
-            const lyricsContainer = document.getElementById('lyrics-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressBarContainer = document.getElementById('progress-bar-container');
-
-            let currentSong = null;
-            let currentTime = 0;
-            let duration = 100; // 假設總時長
-
-            songItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const title = item.dataset.title;
-                    const artist = item.dataset.artist;
-                    const albumCoverSrc = item.dataset.albumCover;
-                    const lyrics = item.dataset.lyrics;
-
-                    songTitleDisplay.textContent = title;
-                    artistNameDisplay.textContent = artist;
-                    albumCover.style.backgroundImage = `url('${albumCoverSrc}')`;
-                    albumCover.textContent = ''; // 移除預留文字
-                    lyricsContainer.textContent = lyrics;
-                    currentSong = { title, artist };
-                    currentTime = 0;
-                    progressBar.style.width = '0%';
-                    // 在這裡可以觸發音樂播放 (串接 YouTube IFrame Player API)
-                    console.log(`播放：${title} - ${artist}`);
-                });
-            });
-
-            // 模擬進度條更新
-            function updateProgressBar() {
-                if (currentSong) {
-                    currentTime += 1;
-                    const progress = (currentTime / duration) * 100;
-                    progressBar.style.width = `${progress}%`;
-                    if (currentTime < duration) {
-                        setTimeout(updateProgressBar, 1000); // 每秒更新
-                    }
+        // 載入 YouTube IFrame Player API
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '390',
+                width: '640',
+                videoId: '',
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
                 }
+            });
+        }
+
+        // 播放器準備就緒時呼叫
+        function onPlayerReady(event) {
+            // event.target.playVideo(); // 預設不自動播放
+        }
+
+        // 播放器狀態改變時呼叫
+         function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                updateProgressBar();
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                isPlaying = false;
+            } else if (event.data === YT.PlayerState.ENDED) {
+                isPlaying = false;
+                // 歌曲播放完畢，您可以自動播放下一首歌曲
+                // playNextSong();
             }
+        }
 
-            progressBarContainer.addEventListener('click', (e) => {
-                if (currentSong) {
-                    const rect = progressBarContainer.getBoundingClientRect();
-                    const clickPosition = e.clientX - rect.left;
-                    const totalWidth = rect.width;
-                    const newTime = (clickPosition / totalWidth) * duration;
-                    currentTime = newTime;
-                    progressBar.style.width = `${(currentTime / duration) * 100}%`;
-                    console.log(`跳轉到 ${currentTime} 秒`);
-                    // 在這裡可以控制音樂播放器的跳轉
-                }
+        // 播放歌曲
+        function playSong(videoId) {
+            currentVideoId = videoId;
+            player.loadVideoById(videoId);
+        }
+
+        // 搜尋歌曲 (需要後端程式碼)
+        async function searchSongs(query) {
+            // 將搜尋 запросы 傳送到您的後端伺服器，該伺服器將使用 ytmusicapi 搜尋歌曲
+            //  fetch(`/search?query=${query}`)  <==  這行在 GitHub Pages 可能無法直接運作
+            //  您需要一個後端伺服器來處理搜尋 запросы，或者使用 serverless 函數 (例如，Cloud Functions)
+            //  為了簡化範例，我們在這裡使用一個模擬的 Promise 來示範
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockResults = [
+                        { videoId: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up', artist: 'Rick Astley' },
+                        { videoId: 'fJ9rUzIMcZQ', title: 'Bohemian Rhapsody', artist: 'Queen' },
+                        { videoId: 'k1i39Icr16E', title: 'Imagine', artist: 'John Lennon' },
+                    ];
+                    const filteredResults = mockResults.filter(song => song.title.toLowerCase().includes(query.toLowerCase()));
+                    resolve(filteredResults);
+                }, 500); // 模擬 500ms 的延遲
             });
+        }
 
-            // 啟動模擬進度條 (在選擇歌曲後啟動會更好)
-            // setTimeout(updateProgressBar, 4000);
+        // 顯示搜尋結果
+        function displaySearchResults(results) {
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = ''; // 清除先前的結果
+
+            results.forEach(song => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${song.title} - ${song.artist}`;
+                listItem.dataset.videoId = song.videoId;
+                listItem.addEventListener('click', () => {
+                    playSong(song.videoId);
+                });
+                resultsList.appendChild(listItem);
+            });
+        }
+
+        // 更新進度條
+        function updateProgressBar() {
+            if (isPlaying && currentVideoId) {
+                const duration = player.getDuration();
+                const currentTime = player.getCurrentTime();
+                const progress = (currentTime / duration) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                setTimeout(updateProgressBar, 100); // 每 100 毫秒更新一次
+            }
+        }
+
+        // 進度條點擊事件
+        document.getElementById('progress-bar-container').addEventListener('click', (e) => {
+            if (currentVideoId) {
+                const totalWidth = e.target.offsetWidth;
+                const clickPosition = e.offsetX;
+                const newTime = (clickPosition / totalWidth) * player.getDuration();
+                player.seekTo(newTime, true);
+            }
+        });
+
+        // 搜尋按鈕點擊事件處理程序
+        document.getElementById('search-button').addEventListener('click', async () => {
+            const query = document.getElementById('search-box').value;
+            const results = await searchSongs(query);
+            displaySearchResults(results);
         });
     </script>
-
 </body>
 </html>
