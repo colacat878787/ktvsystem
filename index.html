@@ -189,7 +189,7 @@
                     <div class="loading-spinner"></div>
                 </div>
                 <div id="youtube-embed">
-                    <iframe id="yt-iframe" src="http://www.youtube.com" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onerror="console.error('YouTube iframe 無法載入。');"></iframe>
+                    <iframe id="yt-iframe" src="https://discord.com/app" title="Discord App" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onerror="console.error('Discord iframe 無法載入。');"></iframe>
                 </div>
                 <div id="hdmi-indicator">HDMI1</div>
             </div>
@@ -258,13 +258,17 @@
                         setTimeout(() => {
                             hdmiIndicatorDiv.style.display = 'none';
                         }, 3000);
-                        console.log('機上盒啟動，顯示 YouTube');
+                        // 將 iframe 的 src 更新為 discord.com/app
+                        ytIframe.src = "https://discord.com/app";
+                        console.log('機上盒啟動，顯示 Discord');
                     }, 3000);
                 } else {
                     stbBootingDiv.style.display = 'none';
                     youtubeEmbedDiv.style.display = 'none';
                     hdmiIndicatorDiv.style.display = 'none';
                     noSignalDiv.style.display = 'flex'; // 機上盒關閉，回到無訊號
+                    // 將 iframe 的 src 恢復為 about:blank 或其他預設內容
+                    ytIframe.src = "about:blank";
                     console.log('機上盒關閉');
                 }
             } else {
