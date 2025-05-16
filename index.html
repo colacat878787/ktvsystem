@@ -28,19 +28,21 @@
             gap: 50px;
             align-items: flex-start;
             margin-bottom: 30px;
+            width: 100%; /* 讓客廳佈局佔滿寬度 */
+            max-width: 1200px; /* 限制最大寬度 */
         }
 
         #tv-setup {
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex-grow: 1; /* 讓電視區域可以伸展 */
         }
 
         #tv-screen {
             background-color: #222; /* 初始電視關閉顏色 */
-            width: 90%; /* 更大的寬度 */
-            max-width: 1200px; /* 更大的最大寬度 */
-            height: auto;
+            width: 100%; /* 佔滿父容器寬度 */
+            height: 50vh; /* 佔據視窗一半的高度 */
             aspect-ratio: 16 / 9; /* 維持 16:9 比例 */
             border: 2px solid #555;
             position: relative;
@@ -187,7 +189,7 @@
                     <div class="loading-spinner"></div>
                 </div>
                 <div id="youtube-embed">
-                    <iframe src="http://www.youtube.com/embed/?autoplay=1&origin=YOUR_DOMAIN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe id="yt-iframe" src="https://www.youtube.com/embed/dQw4w9WgXcQ`。這是一個更常用的嵌入" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onerror="console.error('YouTube iframe 無法載入。');"></iframe>
                 </div>
                 <div id="hdmi-indicator">HDMI1</div>
             </div>
@@ -208,6 +210,7 @@
         const stbBootingDiv = document.getElementById('stb-booting');
         const youtubeEmbedDiv = document.getElementById('youtube-embed');
         const hdmiIndicatorDiv = document.getElementById('hdmi-indicator');
+        const ytIframe = document.getElementById('yt-iframe');
 
         let tvOn = false;
         let stbOn = false;
