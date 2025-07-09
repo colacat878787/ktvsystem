@@ -3,284 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模擬客廳與智慧機上盒</title>
+    <title>椰子水培根的超酷自我介紹</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 設置 Inter 字體 -->
     <style>
         body {
-            font-family: sans-serif;
-            background-color: #333;
-            color: #eee;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* 淺灰色背景 */
+            color: #374151; /* 深灰色文字 */
+            overflow-x: hidden; /* 防止水平滾動 */
         }
-
-        h1 {
-            color: #eee;
-            margin-bottom: 20px;
-        }
-
-        #living-room {
-            display: flex;
-            gap: 50px;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            width: 100%; /* 讓客廳佈局佔滿寬度 */
-            max-width: 1200px; /* 限制最大寬度 */
-        }
-
-        #tv-setup {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-grow: 1; /* 讓電視區域可以伸展 */
-        }
-
-        #tv-screen {
-            background-color: #222; /* 初始電視關閉顏色 */
-            width: 100%; /* 佔滿父容器寬度 */
-            height: 50vh; /* 佔據視窗一半的高度 */
-            aspect-ratio: 16 / 9; /* 維持 16:9 比例 */
-            border: 2px solid #555;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            text-align: center;
-            margin-bottom: 10px;
-            overflow: hidden; /* 確保開機畫面不超出邊界 */
-        }
-
-        #tv-boot-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #4CAF50, #2196F3); /* 美化的開機背景 */
-            color: white;
-            display: none; /* 預設隱藏 */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 3em;
+        /* 自定義動畫類別 */
+        .fade-in-up {
             opacity: 0;
-            animation: fadeIn 1s ease-in forwards;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
+        .fade-in-up.active {
+            opacity: 1;
+            transform: translateY(0);
         }
-
-        #no-signal {
-            display: none;
-            color: #aaa;
-        }
-
-        #stb-booting {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #FF9800, #F44336); /* 美化的機上盒啟動背景 */
-            color: white;
-            display: none; /* 預設隱藏 */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5em;
+        .scale-in {
             opacity: 0;
-            animation: fadeIn 1s ease-in forwards;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
-
-        .loading-spinner {
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            border: 8px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            animation: spin 1.5s linear infinite;
-            margin-bottom: 20px;
+        .scale-in.active {
+            opacity: 1;
+            transform: scale(1);
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
         }
-
-        #youtube-embed {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
+        .slide-in-left.active {
+            opacity: 1;
+            transform: translateX(0);
         }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
         }
-
-        #hdmi-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            display: none;
+        .slide-in-right.active {
+            opacity: 1;
+            transform: translateX(0);
         }
-
-        #stb {
-            background-color: #444;
-            color: #eee;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 0.9em;
+        /* 橫幅圖片的慢速脈衝動畫 */
+        @keyframes pulse-slow {
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.03);
+                filter: brightness(1.1);
+            }
         }
-
-        #remote {
-            background-color: #555;
-            color: #eee;
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* 頭像周圍的慢速脈衝動畫 */
+        @keyframes ping-slow {
+            0% {
+                transform: scale(0.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
         }
-
-        .remote-button {
-            background-color: #666;
-            color: #eee;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            min-width: 120px;
-            text-align: center;
+        /* 頁面切換的淡入效果 */
+        .page-section {
+            display: none; /* 預設隱藏所有頁面 */
+        }
+        .page-section.active-page {
+            display: block; /* 顯示當前活躍頁面 */
+            animation: fadeInPage 0.8s ease-out forwards; /* 淡入動畫 */
+        }
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <h1>模擬您的客廳</h1>
-
-    <div id="living-room">
-        <div id="tv-setup">
-            <div id="tv-screen">
-                <div id="tv-boot-screen">
-                    <div>電視開機中...</div>
-                    <div class="loading-spinner"></div>
-                </div>
-                <div id="no-signal">無訊號</div>
-                <div id="stb-booting">
-                    <div>啟動智慧機上盒...</div>
-                    <div class="loading-spinner"></div>
-                </div>
-                <div id="youtube-embed">
-                    <iframe id="yt-iframe" src="https://discord.com/app" title="Discord App" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onerror="console.error('Discord iframe 無法載入。');"></iframe>
-                </div>
-                <div id="hdmi-indicator">HDMI1</div>
+    <!-- 導航列 -->
+    <nav class="bg-gray-800 p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-white text-2xl font-bold rounded-md px-3 py-2 hover:bg-gray-700 transition-colors duration-300">椰子水培根</a>
+            <div class="space-x-4">
+                <a href="#home" class="nav-link text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-lg font-medium transition-colors duration-300">首頁</a>
+                <a href="#about" class="nav-link text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-lg font-medium transition-colors duration-300">關於我</a>
+                <a href="#skills" class="nav-link text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-lg font-medium transition-colors duration-300">我的技能</a>
+                <a href="#contact" class="nav-link text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-lg font-medium transition-colors duration-300">聯絡我</a>
             </div>
-            <div id="stb">智慧機上盒</div>
         </div>
+    </nav>
 
-        <div id="remote">
-            <h2>遙控器</h2>
-            <button class="remote-button" onclick="powerOnTV()">電視電源</button>
-            <button class="remote-button" onclick="powerOnSTB()">機上盒電源</button>
+    <!-- 首頁區塊 -->
+    <section id="home" class="page-section active-page">
+        <!-- 橫幅區塊 -->
+        <header class="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden shadow-lg">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6arYgcJGqnlpxo9lHOpoB6q4qA33EhZyPrw&s" alt="我的酷炫橫幅"
+                 class="absolute inset-0 w-full h-full object-cover animate-pulse-slow">
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-75"></div>
+            <div class="relative z-10 flex items-center justify-center h-full text-white text-center p-4">
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg scale-in active-on-load">
+                    椰子水培根的超酷自我介紹
+                </h1>
+            </div>
+        </header>
+
+        <!-- 頭像與簡介區塊 -->
+        <div class="container mx-auto px-4 -mt-20 relative z-20 mb-12">
+            <div class="bg-white rounded-xl shadow-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8 transform transition-all duration-500 hover:scale-[1.01]">
+                <div class="relative">
+                    <img src="https://yt3.ggpht.com/BBm46QE_CIgyYlyIythuE3rYpfpJAcbG91vZ2dB64sJ7Tvn4Di8WCvN7YxgTRtxANUz_-N9qdQ=s108-c-k-c0x00ffffff-no-rj" alt="我的帥氣頭像"
+                         class="w-40 h-40 rounded-full object-cover border-8 border-white shadow-lg transform transition-transform duration-300 hover:scale-105 scale-in active-on-load">
+                    <div class="absolute bottom-0 right-0 bg-green-500 w-8 h-8 rounded-full border-4 border-white animate-ping-slow"></div>
+                </div>
+                <div class="text-center md:text-left slide-in-right active-on-load">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">哈囉！我是 椰子水培根</h2>
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        一個熱愛程式與遊戲的探索者，用鍵盤敲出我的世界，在虛擬中尋找無限可能！
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- 關於我區塊 -->
+    <section id="about" class="page-section container mx-auto px-4 py-12">
+        <div class="bg-white rounded-xl shadow-xl p-6 md:p-8 mb-8 fade-in-up">
+            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">
+                關於我
+            </h3>
+            <p class="text-gray-700 leading-relaxed text-lg">
+                我是椰子水培根，一個充滿好奇心和學習熱情的個體。
+                我喜歡探索新技術、鑽研程式碼的奧秘，並在遊戲世界中尋找樂趣與挑戰。
+                我相信透過不斷學習和實踐，可以創造出更多有趣且有用的東西。
+            </p>
+            <p class="text-gray-700 leading-relaxed text-lg mt-4">
+                我的座右銘是：「生命不息，創造不止。」
+            </p>
+        </div>
+    </section>
+
+    <!-- 我的酷炫技能區塊 -->
+    <section id="skills" class="page-section container mx-auto px-4 py-12">
+        <div class="bg-white rounded-xl shadow-xl p-6 md:p-8 mb-8 fade-in-up">
+            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 border-b-2 border-purple-500 pb-2">
+                我的酷炫技能
+            </h3>
+            <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-lg">
+                <li class="bg-blue-100 text-blue-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-left">
+                    <strong class="font-semibold">寫程式：</strong> 熱衷於編寫程式碼，享受解決問題和創造的過程。
+                </li>
+                <li class="bg-green-100 text-green-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-left delay-100">
+                    <strong class="font-semibold">玩遊戲：</strong> 沉浸在各種遊戲世界中，從中獲得樂趣和啟發。
+                </li>
+                <li class="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-left delay-200">
+                    <strong class="font-semibold">快速學習：</strong> 能夠迅速掌握新知識和新技能。
+                </li>
+                <li class="bg-red-100 text-red-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-right">
+                    <strong class="font-semibold">問題解決：</strong> 擅長分析問題並找到有效的解決方案。
+                </li>
+                <li class="bg-indigo-100 text-indigo-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-right delay-100">
+                    <strong class="font-semibold">團隊合作：</strong> 樂於與他人協作，共同達成目標。
+                </li>
+                <li class="bg-pink-100 text-pink-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 slide-in-right delay-200">
+                    <strong class="font-semibold">創意發想：</strong> 喜歡提出新穎的想法和點子。
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 聯絡我區塊 -->
+    <section id="contact" class="page-section container mx-auto px-4 py-12">
+        <div class="bg-white rounded-xl shadow-xl p-6 md:p-8 fade-in-up">
+            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 border-b-2 border-orange-500 pb-2">
+                聯絡我
+            </h3>
+            <p class="text-gray-700 leading-relaxed text-lg mb-4">
+                如果你對我感興趣，或者想進一步交流，歡迎透過以下方式聯絡我：
+            </p>
+            <ul class="text-lg space-y-2">
+                <li class="flex items-center slide-in-left">
+                    <span class="text-blue-500 mr-2">✉️</span> 電子郵件：
+                    <a href="mailto:0226bacon0226@duck.com" class="text-blue-600 hover:underline">0226bacon0226@duck.com</a>
+                </li>
+                <li class="flex items-center slide-in-left delay-100">
+                    <span class="text-green-500 mr-2">📸</span> Instagram：
+                    <a href="https://www.instagram.com/0226_bacon" target="_blank" class="text-blue-600 hover:underline">instagram.com/0226_bacon</a>
+                </li>
+                <li class="flex items-center slide-in-left delay-200">
+                    <span class="text-purple-500 mr-2">🎮</span> Discord：
+                    <span class="text-gray-800 font-bold bg-purple-100 px-2 py-1 rounded-md shadow-sm">bacon690214</span>
+                    <span class="ml-2 text-sm text-gray-500">(請在 Discord 中搜尋並添加好友)</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 頁腳 -->
+    <footer class="bg-gray-800 text-white text-center p-6 mt-12 shadow-inner">
+        <p class="text-sm">&copy; <span id="current-year"></span> 椰子水培根 版權所有。所有權利保留。</p>
+        <p class="text-xs mt-2">設計與開發：椰子水培根</p>
+    </footer>
+
+    <!-- Chatway 聊天小工具 -->
+    <script id="chatway" async="true" src="https://cdn.chatway.app/widget.js?id=KGLMeQFNaFtJ"></script>
 
     <script>
-        const tvScreen = document.getElementById('tv-screen');
-        const tvBootScreenDiv = document.getElementById('tv-boot-screen');
-        const noSignalDiv = document.getElementById('no-signal');
-        const stbBootingDiv = document.getElementById('stb-booting');
-        const youtubeEmbedDiv = document.getElementById('youtube-embed');
-        const hdmiIndicatorDiv = document.getElementById('hdmi-indicator');
-        const ytIframe = document.getElementById('yt-iframe');
+        // JavaScript 動畫邏輯與頁面切換
+        document.addEventListener('DOMContentLoaded', function() {
+            // 設定當前年份
+            document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        let tvOn = false;
-        let stbOn = false;
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageSections = document.querySelectorAll('.page-section');
 
-        function powerOnTV() {
-            tvOn = !tvOn;
-            stbOn = false;
-            if (tvOn) {
-                tvScreen.style.backgroundColor = '#000';
-                tvBootScreenDiv.style.display = 'flex';
-                noSignalDiv.style.display = 'none';
-                stbBootingDiv.style.display = 'none';
-                youtubeEmbedDiv.style.display = 'none';
-                hdmiIndicatorDiv.style.display = 'none';
-                console.log('電視開機中...');
-                setTimeout(() => {
-                    tvBootScreenDiv.style.display = 'none';
-                    noSignalDiv.style.display = 'flex';
-                    console.log('電視開啟，無訊號');
-                }, 3000); // 模擬 3 秒開機
-            } else {
-                tvScreen.style.backgroundColor = '#222';
-                tvBootScreenDiv.style.display = 'none';
-                noSignalDiv.style.display = 'none';
-                stbBootingDiv.style.display = 'none';
-                youtubeEmbedDiv.style.display = 'none';
-                hdmiIndicatorDiv.style.display = 'none';
-                console.log('電視關閉');
-            }
-        }
-
-        function powerOnSTB() {
-            if (tvOn) {
-                stbOn = !stbOn;
-                if (stbOn) {
-                    noSignalDiv.style.display = 'none';
-                    stbBootingDiv.style.display = 'flex';
-                    youtubeEmbedDiv.style.display = 'none';
-                    hdmiIndicatorDiv.style.display = 'none';
-                    console.log('啟動智慧機上盒...');
-                    setTimeout(() => {
-                        stbBootingDiv.style.display = 'none';
-                        youtubeEmbedDiv.style.display = 'block';
-                        hdmiIndicatorDiv.style.display = 'block';
-                        setTimeout(() => {
-                            hdmiIndicatorDiv.style.display = 'none';
-                        }, 3000);
-                        // 將 iframe 的 src 更新為 discord.com/app
-                        ytIframe.src = "https://www.google.com";
-                        console.log('機上盒啟動，顯示 Discord');
-                    }, 3000);
-                } else {
-                    stbBootingDiv.style.display = 'none';
-                    youtubeEmbedDiv.style.display = 'none';
-                    hdmiIndicatorDiv.style.display = 'none';
-                    noSignalDiv.style.display = 'flex'; // 機上盒關閉，回到無訊號
-                    // 將 iframe 的 src 恢復為 about:blank 或其他預設內容
-                    ytIframe.src = "about:blank";
-                    console.log('機上盒關閉');
+            // 顯示指定頁面
+            function showPage(pageId) {
+                pageSections.forEach(section => {
+                    section.classList.remove('active-page');
+                });
+                const activePage = document.getElementById(pageId);
+                if (activePage) {
+                    activePage.classList.add('active-page');
+                    // 重新觸發新頁面內的滾動動畫
+                    triggerAnimations(activePage);
                 }
-            } else {
-                alert('請先開啟電視。');
             }
-        }
 
-        // 模擬網頁載入時電視是關閉的
-        window.onload = function() {
-            tvScreen.style.backgroundColor = '#222';
-        };
+            // 滾動時觸發的動畫效果
+            const observerOptions = {
+                root: null, // 視窗作為根元素
+                rootMargin: '0px',
+                threshold: 0.1 // 當元素有 10% 進入視窗時觸發
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target); // 觸發一次後就停止觀察
+                    }
+                });
+            }, observerOptions);
+
+            // 觸發指定容器內的動畫
+            function triggerAnimations(container) {
+                container.querySelectorAll('.fade-in-up, .slide-in-left, .slide-in-right, .scale-in').forEach(element => {
+                    // 移除 active 類別以便重新觸發動畫（如果需要）
+                    element.classList.remove('active');
+                    // 強制重繪以確保動畫重新播放
+                    void element.offsetWidth;
+                    observer.observe(element);
+                });
+            }
+
+            // 導航列點擊事件
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('href').substring(1); // 獲取頁面ID (例如 'home', 'about')
+                    showPage(pageId);
+                });
+            });
+
+            // 針對頁面載入時就應該出現的動畫
+            document.querySelectorAll('.active-on-load').forEach(element => {
+                element.classList.add('active');
+            });
+
+            // 初始載入時觸發首頁的動畫
+            triggerAnimations(document.getElementById('home'));
+        });
     </script>
-
 </body>
 </html>
